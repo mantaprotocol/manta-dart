@@ -29,7 +29,7 @@ void main() {
         }));
   });
   test('AckMessage decode', () {
-    AckMessage ack = AckMessage.fromJson({
+    final ack = AckMessage.fromJson({
       'status': 'new',
       'url': 'manta://something',
       'txid': '0',
@@ -46,6 +46,38 @@ void main() {
             txid: '0',
             amount: Decimal.parse('5.45'))));
   });
+
+  test('AckMessage encode null amount', () {
+    final ack = AckMessage(status: 'new', url: 'manta://something', txid: '0');
+    expect(
+        ack.toJson(),
+        equals({
+          'status': 'new',
+          'url': 'manta://something',
+          'txid': '0',
+          'amount': null,
+          'transaction_hash': null,
+          'transaction_currency': null,
+          'memo': null
+        }));
+  });
+
+  test('AckMessage decode null amount', () {
+    final ack = AckMessage.fromJson({
+      'status': 'new',
+      'url': 'manta://something',
+      'txid': '0',
+      'amount': null,
+      'transaction_hash': null,
+      'transaction_currency': null,
+      'memo': null
+    });
+    expect(
+        ack,
+        equals(AckMessage(
+            status: 'new', url: 'manta://something', txid: '0', amount: null)));
+  });
+
   test('Equality test with same class', () {
     var a = AckMessage(status: 'new');
     var b = AckMessage(status: 'new');

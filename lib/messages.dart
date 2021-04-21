@@ -3,9 +3,9 @@ import 'dart:convert' show jsonDecode, jsonEncode;
 import 'package:decimal/decimal.dart' show Decimal;
 import 'package:json_annotation/json_annotation.dart'
     show JsonSerializable, JsonKey;
-import "package:pointycastle/export.dart" show RSAPrivateKey, RSAPublicKey;
+import 'package:pointycastle/export.dart' show RSAPrivateKey, RSAPublicKey;
 
-import "crypto.dart" show RsaKeyHelper;
+import 'crypto.dart' show RsaKeyHelper;
 
 part 'messages.g.dart';
 
@@ -13,9 +13,9 @@ const MANTA_VERSION = '1.6';
 const HASHCODE_K = 37 * 17;
 
 Decimal str_to_decimal(String value) =>
-    value == 'null' ? null : Decimal.parse(value);
+    value == null ? null : Decimal.parse(value);
 
-String decimal_to_str(Decimal value) => value.toString();
+String decimal_to_str(Decimal value) => value == null ? null : value.toString();
 
 abstract class BaseMessage {
   bool _equalData(BaseMessage other) {
