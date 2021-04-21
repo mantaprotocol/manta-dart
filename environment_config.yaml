@@ -1,0 +1,11 @@
+environment_config:
+  fields:
+    mqttPort:
+      type: int
+      default: 1883
+    mqttWSPort:
+      type: int
+      default: 80
+    storePort:
+      type: int
+      default: 8080

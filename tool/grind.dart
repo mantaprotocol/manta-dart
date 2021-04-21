@@ -48,13 +48,27 @@ void integration() {
   }
 
   final mqttPort = getHostPort('mosquitto', 1883);
+  final mqttWSPort = getHostPort('mosquitto', 8080);
   final storePort = getHostPort('store', 8080);
+
+  Pub.run(
+    'environment_config:generate',
+    arguments: [
+      '--mqttPort=$mqttPort',
+      '--mqttWSPort=$mqttWSPort',
+      '--storePort=$storePort',
+    ],
+
+    // runOptions: RunOptions(environment: {
+    //   'MQTT_PORT': mqttPort.toString(),
+    //   'STORE_PORT': storePort.toString(),
+    // })
+  );
+
   TestRunner().test(
-      files: 'test/wallet_test_mqtt.dart',
-      runOptions: RunOptions(environment: {
-        'MQTT_PORT': mqttPort.toString(),
-        'STORE_PORT': storePort.toString(),
-      }));
+    files: 'test/wallet_test_mqtt.dart',
+    platformSelector: ['vm', 'chrome'],
+  );
 
   if (args.getFlag('start-docker')) {
     stop_docker();

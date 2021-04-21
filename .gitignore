@@ -4,3 +4,4 @@
 android
 ios
 .packages
+environment_config.dart

@@ -6,6 +6,7 @@ import 'package:async/async.dart' show StreamQueue;
 import 'package:logging/logging.dart' show Logger;
 import 'package:meta/meta.dart' show required;
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
+import 'package:manta_dart/protocol.dart';
 import 'package:manta_dart/server.dart' if (dart.library.html) 'browser.dart'
     as mqttsetup;
 
@@ -35,7 +36,7 @@ class MantaWallet {
   StreamQueue<AckMessage> acks;
   StreamQueue<PaymentRequestEnvelope> requests;
   bool _gettingCert = false;
-  bool useWebSocket = false;
+  Protocol protocol = Protocol.mqtt;
   bool autoReconnect = false;
 
   static Match parseUrl(String url) {
@@ -49,10 +50,10 @@ class MantaWallet {
       this.host = 'localhost',
       this.port = MQTT_DEFAULT_PORT,
       mqtt.MqttClient mqtt_client,
-      this.useWebSocket = false,
+      this.protocol = Protocol.mqtt,
       this.autoReconnect = false}) {
     client = (mqtt_client == null)
-        ? mqttsetup.setup(host, generate_session_id(), port, useWebSocket)
+        ? mqttsetup.setup(host, generate_session_id(), port, protocol)
         : mqtt_client;
     //client.logging(true);
     client.keepAlivePeriod = 20;
@@ -69,15 +70,18 @@ class MantaWallet {
 
   factory MantaWallet(String url,
       {mqtt.MqttClient mqtt_client,
-      useWebSocket = false,
+      Protocol protocol = Protocol.mqtt,
       autoReconnect = false}) {
     final match = MantaWallet.parseUrl(url);
     if (match != null) {
       int port;
       var host = match.group(1);
-      if (useWebSocket) {
-        port = match.group(2) ?? 443;
+      if (protocol == Protocol.wss) {
+        port = int.parse(match.group(2)) ?? 443;
         host = 'wss://$host/mqtt';
+      } else if (protocol == Protocol.ws) {
+        port = int.parse(match.group(2)) ?? 80;
+        host = 'ws://$host/mqtt';
       } else {
         port = match.group(2) != null
             ? int.parse(match.group(2))
@@ -88,7 +92,7 @@ class MantaWallet {
           host: host,
           port: port,
           mqtt_client: mqtt_client,
-          useWebSocket: useWebSocket,
+          protocol: protocol,
           autoReconnect: autoReconnect);
       return inst;
     }

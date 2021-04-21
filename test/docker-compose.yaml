@@ -4,6 +4,9 @@ services:
     image: eclipse-mosquitto:1.6
     ports:
       - 1883
+      - 8080
+    volumes:
+      - "./mosquitto.conf:/mosquitto/config/mosquitto.conf"
 
   wallet:
     image: alvistar/mantaproto
