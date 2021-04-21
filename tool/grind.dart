@@ -17,13 +17,36 @@ int getHostPort(String service, int port) {
   return int.parse(hostPort);
 }
 
-main(args) => grind(args);
+List<String> getRunningServices() {
+  final result = run('docker-compose',
+      arguments: ['ps', '--services', '--filter', 'status=running'],
+      workingDirectory: 'test');
+
+  return result.split('/n');
+}
+
+void start_docker() {
+  run('docker-compose', arguments: ['up', '-d'], workingDirectory: 'test');
+}
+
+void stop_docker() {
+  run('docker-compose', arguments: ['down'], workingDirectory: 'test');
+}
+
+Future main(args) => grind(args);
 
 @Task()
-test() => TestRunner().testAsync();
+Future test() => TestRunner().testAsync();
 
-@Task()
+@Task(
+    'Executes integration tests. Launch with --start-docker to start docker-compose')
 void integration() {
+  final args = context.invocation.arguments;
+
+  if (args.getFlag('start-docker')) {
+    start_docker();
+  }
+
   final mqttPort = getHostPort('mosquitto', 1883);
   final storePort = getHostPort('store', 8080);
   TestRunner().test(
@@ -32,13 +55,17 @@ void integration() {
         'MQTT_PORT': mqttPort.toString(),
         'STORE_PORT': storePort.toString(),
       }));
+
+  if (args.getFlag('start-docker')) {
+    stop_docker();
+  }
 }
 
 @DefaultTask()
 @Depends(test)
-build() {
+void build() {
   Pub.build();
 }
 
 @Task()
-clean() => defaultClean();
+void clean() => defaultClean();

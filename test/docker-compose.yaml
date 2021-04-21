@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   mosquitto:
-    image: eclipse-mosquitto
+    image: eclipse-mosquitto:1.6
     ports:
       - 1883
 
@@ -60,10 +60,9 @@ services:
       PP_KEYFILE: /keys/test.key
       PP_CERTFILE: /certs/test.crt
       PP_HOST: 0.0.0.0
-#    logging:
-#      driver: syslog
-#      options:
-#        syslog-address: "udp://192.168.20.160:10000"
-#        syslog-format: rfc5424
-#        tag: payproc
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/healthcheck"]
+      retries: 3
+      interval: 60s
+
 
