@@ -6,6 +6,9 @@ import 'package:async/async.dart' show StreamQueue;
 import 'package:logging/logging.dart' show Logger;
 import 'package:meta/meta.dart' show required;
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
+import 'package:manta_dart/server.dart' if (dart.library.html) 'browser.dart'
+    as mqttsetup;
+
 import 'package:pointycastle/export.dart' show RSAPublicKey;
 import 'package:uuid/uuid.dart' show Uuid;
 
@@ -49,7 +52,7 @@ class MantaWallet {
       this.useWebSocket = false,
       this.autoReconnect = false}) {
     client = (mqtt_client == null)
-        ? mqtt.MqttClient.withPort(host, generate_session_id(), port)
+        ? mqttsetup.setup(host, generate_session_id(), port, useWebSocket)
         : mqtt_client;
     //client.logging(true);
     client.keepAlivePeriod = 20;
@@ -87,7 +90,6 @@ class MantaWallet {
           mqtt_client: mqtt_client,
           useWebSocket: useWebSocket,
           autoReconnect: autoReconnect);
-      inst.client.useAlternateWebSocketImplementation = false;
       return inst;
     }
     return null;
@@ -140,7 +142,6 @@ class MantaWallet {
     }
 
     try {
-      client.useWebSocket = useWebSocket;
       await client.connect();
     } catch (e) {
       logger.warning('Client exception - $e');
