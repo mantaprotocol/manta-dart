@@ -76,7 +76,9 @@ class MantaWallet {
         port = match.group(2) ?? 443;
         host = 'wss://$host/mqtt';
       } else {
-        port = match.group(2) ?? MQTT_DEFAULT_PORT;
+        port = match.group(2) != null
+            ? int.parse(match.group(2))
+            : MQTT_DEFAULT_PORT;
       }
       var inst = MantaWallet._internal(
           session_id: match.group(3),
@@ -128,7 +130,7 @@ class MantaWallet {
     return msg;
   }
 
-  void connect() async {
+  Future<void> connect() async {
     if (client.connectionStatus.state == mqtt.MqttConnectionState.connected) {
       return;
     }
@@ -146,7 +148,7 @@ class MantaWallet {
     }
   }
 
-  void reconnect() async {
+  Future<void> reconnect() async {
     logger.info('Waiting $RECONNECT_INTERVAL seconds');
     sleep(Duration(seconds: RECONNECT_INTERVAL));
     logger.info('Reconnecting');
@@ -170,7 +172,7 @@ class MantaWallet {
     if (autoReconnect) reconnect();
   }
 
-  void waitForConnection() async {
+  Future<void> waitForConnection() async {
     if (client.connectionStatus.state == mqtt.MqttConnectionState.connected) {
       return;
     }
