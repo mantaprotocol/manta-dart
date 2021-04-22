@@ -77,10 +77,10 @@ class MantaWallet {
       int port;
       var host = match.group(1);
       if (protocol == Protocol.wss) {
-        port = int.parse(match.group(2)) ?? 443;
+        port = match.group(2) != null ? int.parse(match.group(2)) : 443;
         host = 'wss://$host/mqtt';
       } else if (protocol == Protocol.ws) {
-        port = int.parse(match.group(2)) ?? 80;
+        port = match.group(2) != null ? int.parse(match.group(2)) : 80;
         host = 'ws://$host/mqtt';
       } else {
         port = match.group(2) != null
