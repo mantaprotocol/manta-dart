@@ -1,9 +1,9 @@
 name: manta_dart
 version: 0.1.0
 description: Manta Protocol implementation for Dart
-author: Appia Systems Limited
-homepage: http://appia.co
-documentation: https://appiapay.github.io/manta-python
+author: Alessandro Viganò
+homepage: https://mantaprotocol.github.io/manta-python/html/index.html
+documentation: https://mantaprotocol.github.io/manta-python/html/index.html
 environment:
   sdk: ">=2.1.0 <3.0.0"
 
