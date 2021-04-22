@@ -8,9 +8,9 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
-  mqtt_client: ^9.2.0
+  mqtt_client: ^8.2.0
   decimal: ^0.3.2
-  uuid: ^3.0.4
+  uuid: ^2.2.2
   json_annotation: '>=2.0.0'
   logging: ^1.0.1
   pointycastle: ^3.0.1
@@ -25,5 +25,5 @@ dev_dependencies:
   mockito: ^3.0.0
   pedantic: ^1.8.0
   grinder: ^0.9.0
-  environment_config: ^2.3.0
+  environment_config: ^2.2.5
   http: ^0.13.1

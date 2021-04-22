@@ -221,7 +221,7 @@ class MantaWallet {
     return msg;
   }
 
-  void sendPayment(
+  Future<void> sendPayment(
       {@required String transactionHash,
       @required String cryptoCurrency}) async {
     await connect();
