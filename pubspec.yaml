@@ -1,5 +1,5 @@
 name: manta_dart
-version: 0.1.0
+version: 0.2.0
 description: Manta Protocol implementation for Dart
 author: Alessandro Viganò
 homepage: https://mantaprotocol.github.io/manta-python/html/index.html
@@ -8,9 +8,9 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
-  mqtt_client: ^8.2.0
+  mqtt_client: ^9.6.1
   decimal: ^0.3.2
-  uuid: ^2.2.2
+  uuid: ^3.0.4
   json_annotation: '>=2.0.0'
   logging: ^1.0.1
   pointycastle: ^3.0.1
