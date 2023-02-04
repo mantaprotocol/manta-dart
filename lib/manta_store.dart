@@ -19,21 +19,21 @@ final Logger logger = Logger('MantaStore');
 const RECONNECT_INTERVAL = 3;
 
 class MantaStore {
-  String session_id;
+  String? session_id;
   final subscriptions = <String>[];
-  mqtt.MqttClient client;
+  late mqtt.MqttClient client;
   final String application_id;
-  final String application_token;
-  Stream<AckMessage> acks_stream;
-  StreamQueue<AckMessage> acks;
+  final String? application_token;
+  Stream<AckMessage>? acks_stream;
+  StreamQueue<AckMessage>? acks;
   bool reconnection = true;
 
   MantaStore(
-      {@required this.application_id,
+      {required this.application_id,
       this.application_token,
       String host = 'localhost',
-      mqtt.MqttClient mqtt_client})
-      : assert(host?.isNotEmpty) {
+      mqtt.MqttClient? mqtt_client})
+      : assert(host.isNotEmpty) {
     client = (mqtt_client == null)
         ? mqtt.MqttClient(host, generate_session_id())
         : mqtt_client;
@@ -44,7 +44,7 @@ class MantaStore {
     client.setProtocolV311();
   }
 
-  void reconnect() async {
+  Future<void> reconnect() async {
     logger.info('Waiting $RECONNECT_INTERVAL seconds');
     await Future.delayed(const Duration(seconds: RECONNECT_INTERVAL));
     // sleep(Duration(seconds: RECONNECT_INTERVAL));
@@ -60,17 +60,17 @@ class MantaStore {
     ;
   }
 
-  void onUnsubscribed(String topic) {
+  void onUnsubscribed(String? topic) {
     logger.info('Unsubscribed from $topic');
   }
 
   Future<void> waitForConnection() async {
-    if (client.connectionStatus.state == mqtt.MqttConnectionState.connected) {
+    if (client.connectionStatus?.state == mqtt.MqttConnectionState.connected) {
       return;
-    } else if (client.connectionStatus.state ==
+    } else if (client.connectionStatus?.state ==
         mqtt.MqttConnectionState.connecting) {
-      while (
-          client.connectionStatus.state != mqtt.MqttConnectionState.connected) {
+      while (client.connectionStatus?.state !=
+          mqtt.MqttConnectionState.connected) {
         await Future.delayed(Duration(milliseconds: 100));
       }
     }
@@ -81,24 +81,24 @@ class MantaStore {
     subscriptions.add(topic);
   }
 
-  void clean() async {
+  Future<void> clean() async {
     for (var topic in subscriptions) {
       logger.info('Unsubscribing $topic');
       client.unsubscribe(topic);
     }
 
-    await acks.cancel();
+    await acks?.cancel();
 
-    acks = StreamQueue<AckMessage>(acks_stream.asBroadcastStream());
+    acks = StreamQueue<AckMessage>(acks_stream!.asBroadcastStream());
 
     subscriptions.clear();
   }
 
-  void connect() async {
-    if (client.connectionStatus.state == mqtt.MqttConnectionState.connected) {
+  Future<void> connect() async {
+    if (client.connectionStatus?.state == mqtt.MqttConnectionState.connected) {
       return;
     }
-    if (client.connectionStatus.state == mqtt.MqttConnectionState.connecting) {
+    if (client.connectionStatus?.state == mqtt.MqttConnectionState.connecting) {
       await waitForConnection();
       return;
     }
@@ -113,7 +113,7 @@ class MantaStore {
 
     // Connect acks_stream
 
-    acks_stream = client.updates.where((c) {
+    acks_stream = client.updates?.where((c) {
       final tokens = c[0].topic.split('/');
       return tokens[0] == 'acks';
     }).map((List<mqtt.MqttReceivedMessage> c) {
@@ -124,7 +124,7 @@ class MantaStore {
       return ackMessage;
     });
 
-    acks = StreamQueue<AckMessage>(acks_stream.asBroadcastStream());
+    acks = StreamQueue<AckMessage>(acks_stream!.asBroadcastStream());
   }
 
   void disconnect() {
@@ -134,11 +134,10 @@ class MantaStore {
 
   void dispose() {
     disconnect();
-    client = null;
   }
 
   Future<AckMessage> merchant_order_request(
-      {@required Decimal amount, @required String fiat, String crypto}) async {
+      {required Decimal amount, required String fiat, String? crypto}) async {
     await connect();
 
     await clean();
@@ -147,7 +146,7 @@ class MantaStore {
 
     final request = MerchantOrderRequestMessage(
         amount: amount,
-        session_id: session_id,
+        session_id: session_id!,
         fiat_currency: fiat,
         crypto_currency: crypto);
 
@@ -157,19 +156,19 @@ class MantaStore {
     builder.addString(json.encode(request));
 
     client.publishMessage('merchant_order_request/$application_id',
-        mqtt.MqttQos.atLeastOnce, builder.payload);
+        mqtt.MqttQos.atLeastOnce, builder.payload!);
 
     logger.info('Publishing merchant_order_request for session $session_id');
 
-    final ack = await acks.next.timeout(Duration(seconds: 2));
+    final ack = await acks?.next.timeout(Duration(seconds: 2));
 
-    if (ack.status != 'new') {
-      throw Exception('Invalid ack message ${ack.toJson()}');
+    if (ack?.status != 'new') {
+      throw Exception('Invalid ack message ${ack?.toJson()}');
     }
 
-    logger.info('Received ack: ${ack.toJson()}');
+    logger.info('Received ack: ${ack?.toJson()}');
 
-    return ack;
+    return ack!;
   }
 
   void merchant_order_cancel() {
@@ -179,7 +178,7 @@ class MantaStore {
     builder.addString('');
 
     client.publishMessage('merchant_order_cancel/$session_id',
-        mqtt.MqttQos.atLeastOnce, builder.payload);
+        mqtt.MqttQos.atLeastOnce, builder.payload!);
   }
 }
 

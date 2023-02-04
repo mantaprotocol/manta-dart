@@ -1,8 +1,8 @@
 import 'dart:convert' show json, jsonEncode, jsonDecode;
-import "dart:io" show File;
+import 'dart:io' show File;
 
 import 'package:decimal/decimal.dart' show Decimal;
-import "package:pointycastle/export.dart" show RSAPublicKey;
+import 'package:pointycastle/export.dart' show RSAPublicKey;
 import 'package:test/test.dart' show expect, equals, isNot, test;
 
 import 'package:manta_dart/crypto.dart' show RsaKeyHelper;
@@ -79,8 +79,8 @@ void main() {
   });
 
   test('Equality test with same class', () {
-    var a = AckMessage(status: 'new');
-    var b = AckMessage(status: 'new');
+    var a = AckMessage(status: 'new', txid: '0');
+    var b = AckMessage(status: 'new', txid: '0');
     expect(b, equals(a));
     b.memo = 'foo';
     expect(b, isNot(equals(a)));

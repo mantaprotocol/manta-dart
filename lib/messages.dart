@@ -12,10 +12,13 @@ part 'messages.g.dart';
 const MANTA_VERSION = '1.6';
 const HASHCODE_K = 37 * 17;
 
-Decimal str_to_decimal(String value) =>
+Decimal? str_to_decimal(String? value) =>
     value == null ? null : Decimal.parse(value);
 
-String decimal_to_str(Decimal value) => value == null ? null : value.toString();
+String? decimal_to_str(Decimal? value) =>
+    value == null ? null : value.toString();
+
+Decimal str_to_decimal_required(String value) => Decimal.parse(value);
 
 abstract class BaseMessage {
   bool _equalData(BaseMessage other) {
@@ -31,17 +34,17 @@ abstract class BaseMessage {
 
 @JsonSerializable()
 class MerchantOrderRequestMessage extends BaseMessage {
-  @JsonKey(fromJson: str_to_decimal, toJson: decimal_to_str)
+  @JsonKey(fromJson: str_to_decimal_required, toJson: decimal_to_str)
   Decimal amount;
   String session_id;
   String fiat_currency;
-  String crypto_currency;
+  String? crypto_currency;
   String version = MANTA_VERSION;
 
   MerchantOrderRequestMessage(
-      {this.amount,
-      this.session_id,
-      this.fiat_currency,
+      {required this.amount,
+      required this.session_id,
+      required this.fiat_currency,
       this.crypto_currency,
       this.version = MANTA_VERSION});
 
@@ -64,17 +67,17 @@ class MerchantOrderRequestMessage extends BaseMessage {
 class AckMessage extends BaseMessage {
   String txid;
   String status;
-  String url;
+  String? url;
 
   @JsonKey(fromJson: str_to_decimal, toJson: decimal_to_str)
-  Decimal amount;
-  String transaction_hash;
-  String transaction_currency;
-  String memo;
+  Decimal? amount;
+  String? transaction_hash;
+  String? transaction_currency;
+  String? memo;
 
   AckMessage(
-      {this.txid,
-      this.status,
+      {required this.txid,
+      required this.status,
       this.url,
       this.amount,
       this.transaction_hash,
@@ -98,16 +101,16 @@ class AckMessage extends BaseMessage {
 
 @JsonSerializable()
 class Destination extends BaseMessage {
-  @JsonKey(fromJson: str_to_decimal, toJson: decimal_to_str)
+  @JsonKey(fromJson: str_to_decimal_required, toJson: decimal_to_str)
   Decimal amount;
 
   String destination_address;
   String crypto_currency;
 
   Destination({
-    this.amount,
-    this.destination_address,
-    this.crypto_currency,
+    required this.amount,
+    required this.destination_address,
+    required this.crypto_currency,
   });
 
   factory Destination.fromJson(Map<String, dynamic> json) =>
@@ -130,7 +133,7 @@ class Merchant extends BaseMessage {
   String name;
   String address;
 
-  Merchant({this.name, this.address});
+  Merchant({required this.name, required this.address});
 
   factory Merchant.fromJson(Map<String, dynamic> json) =>
       _$MerchantFromJson(json);
@@ -151,7 +154,7 @@ class Merchant extends BaseMessage {
 class PaymentRequestMessage extends BaseMessage {
   Merchant merchant;
 
-  @JsonKey(fromJson: str_to_decimal, toJson: decimal_to_str)
+  @JsonKey(fromJson: str_to_decimal_required, toJson: decimal_to_str)
   Decimal amount;
 
   String fiat_currency;
@@ -162,11 +165,11 @@ class PaymentRequestMessage extends BaseMessage {
       _$PaymentRequestMessageFromJson(json);
 
   PaymentRequestMessage(
-      {this.merchant,
-      this.amount,
-      this.fiat_currency,
-      this.destinations,
-      this.supported_cryptos});
+      {required this.merchant,
+      required this.amount,
+      required this.fiat_currency,
+      required this.destinations,
+      required this.supported_cryptos});
 
   @override
   bool operator ==(dynamic other) {
@@ -198,7 +201,9 @@ class PaymentRequestEnvelope extends BaseMessage {
   String version = MANTA_VERSION;
 
   PaymentRequestEnvelope(
-      {this.message, this.signature, this.version = MANTA_VERSION});
+      {required this.message,
+      required this.signature,
+      this.version = MANTA_VERSION});
 
   factory PaymentRequestEnvelope.fromJson(Map<String, dynamic> json) =>
       _$PaymentRequestEnvelopeFromJson(json);
@@ -231,8 +236,8 @@ class PaymentMessage extends BaseMessage {
   String version;
 
   PaymentMessage(
-      {this.crypto_currency,
-      this.transaction_hash,
+      {required this.crypto_currency,
+      required this.transaction_hash,
       this.version = MANTA_VERSION});
 
   factory PaymentMessage.fromJson(Map<String, dynamic> json) =>

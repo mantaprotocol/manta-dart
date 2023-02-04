@@ -1,29 +1,29 @@
 name: manta_dart
-version: 0.2.0
+version: 0.3.0
 description: Manta Protocol implementation for Dart
 author: Alessandro Viganò
 homepage: https://mantaprotocol.github.io/manta-python/html/index.html
 documentation: https://mantaprotocol.github.io/manta-python/html/index.html
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.19.0 <3.0.0"
 
 dependencies:
-  mqtt_client: ^9.6.1
-  decimal: ^0.3.2
+  mqtt_client: ^9.7.4
+  decimal: ^2.3.2
   uuid: ^3.0.4
-  json_annotation: '>=2.0.0'
+  json_annotation: '>=4.8.0'
   logging: ^1.0.1
   pointycastle: ^3.0.1
-  asn1lib: ^0.6.4
-  rsa_pkcs: ^1.1.1
+  asn1lib: ^1.4.0
+  rsa_pkcs: ^2.0.1
   async: ^2.2.0
 
 dev_dependencies:
   test: ^1.3.4
-  build_runner: ^1.0.0
-  json_serializable: '>=2.0.0'
-  mockito: ^3.0.0
-  pedantic: ^1.8.0
-  grinder: ^0.9.0
-  environment_config: ^2.2.5
+  build_runner: ^2.3.3
+  json_serializable: '>=6.6.1'
+  mockito: ^5.3.2
+  grinder: ^0.9.2
+  environment_config: ^3.1.0
   http: ^0.13.1
+  lints: ^2.0.1

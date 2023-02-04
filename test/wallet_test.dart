@@ -1,23 +1,25 @@
 import 'dart:async';
 import 'dart:convert';
-import "dart:io";
+import 'dart:io';
 
 import 'package:decimal/decimal.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-import "package:test/test.dart" show equals, expect, isNotNull, isNull, test;
+import 'package:test/test.dart' show equals, expect, isNotNull, isNull, test;
 
-import "package:manta_dart/crypto.dart";
-import "package:manta_dart/manta_wallet.dart";
-import "package:manta_dart/messages.dart";
+import 'package:manta_dart/crypto.dart';
+import 'package:manta_dart/manta_wallet.dart';
+import 'package:manta_dart/messages.dart';
 
-const PRIVATE_KEY = "test/certificates/root/keys/test.key";
-const CERTIFICATE = "test/certificates/root/certs/test.crt";
+@GenerateNiceMocks([MockSpec<MqttClient>()])
+import 'wallet_test.mocks.dart';
 
-class MockClient extends Mock implements MqttClient {}
+const PRIVATE_KEY = 'test/certificates/root/keys/test.key';
+const CERTIFICATE = 'test/certificates/root/certs/test.crt';
 
-MockClient mock_it() {
-  final client = MockClient();
+MockMqttClient mock_it() {
+  final client = MockMqttClient();
   final status = MqttClientConnectionStatus();
   status.state = MqttConnectionState.disconnected;
 
@@ -25,26 +27,26 @@ MockClient mock_it() {
       StreamController<List<MqttReceivedMessage<MqttMessage>>>();
 
   var publish_message = MqttPublishMessage();
-  MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+  var builder = MqttClientPayloadBuilder();
   builder.addString(json.encode(payment_request()));
 
-  publish_message.publishData(builder.payload);
+  publish_message.publishData(builder.payload!);
 
-  final message = MqttReceivedMessage("payment_requests/123", publish_message);
+  final message = MqttReceivedMessage('payment_requests/123', publish_message);
 
   publish_message = MqttPublishMessage();
   builder = MqttClientPayloadBuilder();
   builder.addString(File(CERTIFICATE).readAsStringSync());
-  publish_message.publishData(builder.payload);
+  publish_message.publishData(builder.payload!);
 
-  final certMessage = MqttReceivedMessage("certificate", publish_message);
+  final certMessage = MqttReceivedMessage('certificate', publish_message);
   final updates = mqtt_stream_controller.stream.asBroadcastStream();
 
   when(client.updates).thenAnswer((_) => updates);
-  when(client.publishMessage("payment_requests/123/BTC", any, any))
+  when(client.publishMessage('payment_requests/123/BTC', any, any))
       .thenAnswer((_) {
     mqtt_stream_controller.add([message]);
-    return null;
+    return 0;
   });
   when(client.subscribe('certificate', MqttQos.atLeastOnce)).thenAnswer((_) {
     mqtt_stream_controller.add([certMessage]);
@@ -54,7 +56,7 @@ MockClient mock_it() {
   when(client.connect()).thenAnswer((_) {
     status.state = MqttConnectionState.connected;
     if (client.onConnected != null) {
-      client.onConnected();
+      client.onConnected!();
     }
     return Future.value(null);
   });
@@ -89,44 +91,44 @@ PaymentRequestEnvelope payment_request() {
 }
 
 void main() {
-  test("First test", () {
-    var string = "foo";
-    expect(string, equals("foo"));
+  test('First test', () {
+    var string = 'foo';
+    expect(string, equals('foo'));
   });
 
-  test("Parse url", () {
+  test('Parse url', () {
     final match =
-        MantaWallet.parseUrl("manta://localhost/JqhCQ64gTYi02xu4GhBzZg==");
-    expect(match.group(1), equals('localhost'));
-    expect(match.group(3), equals('JqhCQ64gTYi02xu4GhBzZg=='));
+        MantaWallet.parseUrl('manta://localhost/JqhCQ64gTYi02xu4GhBzZg==');
+    expect(match?.group(1), equals('localhost'));
+    expect(match?.group(3), equals('JqhCQ64gTYi02xu4GhBzZg=='));
   });
 
-  test("Parse url with port", () {
-    final match = MantaWallet.parseUrl("manta://127.0.0.1:8000/123");
-    expect(match.group(1), equals('127.0.0.1'));
-    expect(match.group(2), equals('8000'));
-    expect(match.group(3), equals('123'));
+  test('Parse url with port', () {
+    final match = MantaWallet.parseUrl('manta://127.0.0.1:8000/123');
+    expect(match?.group(1), equals('127.0.0.1'));
+    expect(match?.group(2), equals('8000'));
+    expect(match?.group(3), equals('123'));
   });
 
-  test("Parse invalid url", () {
-    final match = MantaWallet.parseUrl("mantas://127.0.0.1:8000/123");
+  test('Parse invalid url', () {
+    final match = MantaWallet.parseUrl('mantas://127.0.0.1:8000/123');
     expect(match, isNull);
   });
 
-  test("Test factory", () {
-    final wallet = MantaWallet("manta://127.0.0.1/123");
+  test('Test factory', () {
+    final wallet = MantaWallet('manta://127.0.0.1/123');
     expect(wallet.host, equals('127.0.0.1'));
     expect(wallet.port, equals(1883));
     expect(wallet.session_id, equals('123'));
   });
 
-  test("Get payment request", () async {
+  test('Get payment request', () async {
     final client = mock_it();
-    final wallet = MantaWallet("manta://127.0.0.1/123", mqtt_client: client);
+    final wallet = MantaWallet('manta://127.0.0.1/123', mqtt_client: client);
     await wallet.connect();
     wallet.onConnected(); // this is only needed due to the mock not working
     // very well
-    final envelope = await wallet.getPaymentRequest(cryptoCurrency: "BTC");
+    final envelope = await wallet.getPaymentRequest(cryptoCurrency: 'BTC');
     final helper = RsaKeyHelper();
     final pr = envelope.unpack();
 
@@ -138,9 +140,9 @@ void main() {
         true);
   });
 
-  test("Send Payment", () async {
+  test('Send Payment', () async {
     final client = mock_it();
-    final wallet = MantaWallet("manta://127.0.0.1/123", mqtt_client: client);
+    final wallet = MantaWallet('manta://127.0.0.1/123', mqtt_client: client);
     await wallet.connect();
     wallet.onConnected(); // this is only needed due to the mock not working
     // very well
@@ -153,14 +155,14 @@ void main() {
     final payload = String.fromCharCodes(publishedParams[1]);
     final pm = PaymentMessage.fromJson(jsonDecode(payload));
 
-    expect(pm.transaction_hash, equals("myhash"));
-    expect(pm.crypto_currency, equals("NANO"));
-    expect(topic, equals("payments/123"));
+    expect(pm.transaction_hash, equals('myhash'));
+    expect(pm.crypto_currency, equals('NANO'));
+    expect(topic, equals('payments/123'));
   });
 
-  test("Receive certificate", () async {
+  test('Receive certificate', () async {
     final client = mock_it();
-    final wallet = MantaWallet("manta://127.0.0.1/123", mqtt_client: client);
+    final wallet = MantaWallet('manta://127.0.0.1/123', mqtt_client: client);
     await wallet.connect();
     wallet.onConnected(); // this is only needed due to the mock not working
     // very well

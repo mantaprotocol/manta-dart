@@ -1,5 +1,5 @@
 repos:
   - repo: https://github.com/alvistar/dartfmt-precommit
-    rev: master
+    rev: f8a8197a4b0777213456cb35ee15187910e9edef
     hooks:
       - id: dartfmt

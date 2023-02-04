@@ -17,12 +17,9 @@ class RemoteController {
   int port;
   String host;
 
-  RemoteController(int port, [String host]) {
-    this.port = port;
-    this.host = host ?? 'localhost';
-  }
+  RemoteController(this.port, [this.host = 'localhost']);
 
-  Future<String> send(String path, [Map data]) async {
+  Future<String> send(String path, Map data) async {
     final body = jsonEncode(data);
     final url = Uri.parse('http://$host:$port$path');
     final response = await http
@@ -49,19 +46,19 @@ void main() {
       ? MQTT_WS_PORT
       : MQTT_PORT;
 
-  MantaWallet wallet;
-  RemoteController store;
-  RemoteController payproc;
+  late MantaWallet wallet;
+  late RemoteController store;
+  late RemoteController payproc;
   setUp(() {
     wallet = MantaWallet('manta://localhost:$mqttPort/123', protocol: protocol);
     store = RemoteController(STORE_PORT);
     payproc = RemoteController(8092);
   });
   test('Connection', () async {
-    expect(wallet.client.connectionStatus.state,
+    expect(wallet.client.connectionStatus?.state,
         mqtt.MqttConnectionState.disconnected);
     await wallet.connect();
-    expect(wallet.client.connectionStatus.state,
+    expect(wallet.client.connectionStatus?.state,
         mqtt.MqttConnectionState.connected);
   });
   test('Get and verify PaymentRequest with local cert', () async {
@@ -70,16 +67,16 @@ void main() {
     print("Res is '$res'");
     var ack = AckMessage.fromJson(jsonDecode(res));
     // Replace mosquitto address to localhost
-    final url = ack.url.replaceFirst('mosquitto', 'localhost:$mqttPort');
+    final url = ack.url!.replaceFirst('mosquitto', 'localhost:$mqttPort');
     print('Manta wallet url: $url');
     wallet = MantaWallet(url, protocol: protocol);
     await wallet.connect();
-    expect(wallet.client.updates.isBroadcast, true);
+    expect(wallet.client.updates?.isBroadcast, true);
     var envelope = await wallet.getPaymentRequest(cryptoCurrency: 'NANO');
     final helper = RsaKeyHelper();
     expect(envelope.verify(helper.parsePublicKeyFromCertificate(CERT)), true);
     var pr = envelope.unpack();
-    expect(pr.fiat_currency, "EUR");
+    expect(pr.fiat_currency, 'EUR');
   });
   test("Get and verify PaymentRequest with PayProc's cert", () async {
     final res =
@@ -87,7 +84,7 @@ void main() {
     print("Res is '$res'");
     var ack = AckMessage.fromJson(jsonDecode(res));
 
-    final url = ack.url.replaceFirst('mosquitto', 'localhost:$mqttPort');
+    final url = ack.url!.replaceFirst('mosquitto', 'localhost:$mqttPort');
     print('Manta wallet url: $url');
     wallet = MantaWallet(url, protocol: protocol);
 
